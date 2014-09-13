@@ -1,0 +1,51 @@
+from django.db import models
+
+# Create your models here.
+
+class Movie():
+    """
+    Represents a Movie. Stores all details related to a Movie.
+    """
+    title = models.CharField(max_length=255, unique=True, verbose_name=_('Title* '))
+    genres = models.ManyToManyField('MovieGenre', blank=True, related_name=_('movies'), verbose_name=_('Genre* '), help_text="Movie Type")
+    related_movies = models.ManyToManyField('self', related_name=_('movies'), help_text="Similar Movies", symmetrical=False)
+    celebs = models.ManyToManyField(Celeb, through='MovieCast', verbose_name=_('celebrities'),
+                                    related_name=_('celebs'), help_text="Stores all the cast and crew of a movie")
+    region = models.IntegerField(choices=MOVIES_REGION_TYPES, blank=False, null=False, verbose_name=_('Region* '), help_text="Movie Industry Name")
+    dubbing_region = models.CommaSeparatedIntegerField(max_length=20, help_text="Also dubbed in ex: 1,3 if movie dubbed in bollywood and tamil", null=True, blank=True)
+    language = models.IntegerField(choices=MOVIES_LANGUAGE_TYPES, blank=False, null=False, verbose_name=_('Language* '), help_text="Primary Language in Movie")
+
+    reviews = generic.GenericRelation(Review, help_text="Reviews for Movies")
+    #TODO : need to see the performace for ratings_count, if needed we can add an extra field
+    ratings = generic.GenericRelation(Rating, help_text="Ratings for Movies")
+    images = generic.GenericRelation(Image)
+    videos = generic.GenericRelation(Video)
+    votes = generic.GenericRelation(Vote, help_text="Wont to watch")
+    
+    movie_short_name = models.CharField(max_length=255, blank=False, null=False, help_text='short name of the movie to display on JS area ')
+    slug = models.SlugField(max_length=255, unique=True, verbose_name=_('Slug* '))
+    verdict = models.CharField(max_length=255, blank=True , null=True)
+
+    sms_code = models.CharField(max_length=5, unique=True, verbose_name=_('Sms Code* '), help_text='mobile SMS code identifier')
+    description = models.TextField(blank=True)
+    related_keywords = models.TextField(blank=True , null=True)
+    runtime = models.PositiveSmallIntegerField(blank=True, null=False, default=0, help_text="In Minutes")
+    release_date = models.DateField(verbose_name=_('Release Date* '))
+    is_day_unknown = models.PositiveSmallIntegerField(choices=RELEASE_DATE_TYPE, verbose_name=_('Release date type *'), null=False, default=0)
+    display_date_type = models.IntegerField(choices=MOVIES_DATE_TYPE, default=1, verbose_name=_('Display Date Type* '))
+    overall_rating = models.DecimalField(max_digits=2, decimal_places=1, null=False, default=0)
+    rating_count = models.IntegerField(null=False, default=0)
+    want_to_watch_count = models.IntegerField(max_length=6, null=False, default=0)
+    alias = models.CharField(blank=True, max_length=100, null=True, help_text=_("movie aliases"))
+    enabled = models.BooleanField(default=True)
+    created_date = models.DateTimeField(_('Created Date'), auto_now_add=True)
+    modified_date = models.DateTimeField(_('Modified Date'), auto_now=True)
+    view_count = models.PositiveIntegerField(default=0)
+    want_to_watch_percentage = models.DecimalField(max_digits=3, decimal_places=1, null=False, default=0)
+    '''
+    objects = models.Manager()
+    active = MovieManager()
+    tags = TaggableManager()
+	''' 
+    def __unicode__(self):
+        return self.title
